@@ -9,7 +9,7 @@ setup(name='OpenRML',
       license='MIT',
       description='ReportLab RML processing and rendering',
       packages = ['openrml'],
-      package_dir = {'openrml': 'openrml'},
+      package_dir = {'openrml': 'src/openrml'},
       scripts = ['scripts/openrml-render'],
       url = 'https://github.com/whardier/OpenRML',
       download_url = 'https://github.com/whardier/OpenRML/tarball/master',
@@ -24,6 +24,6 @@ setup(name='OpenRML',
                      'Topic :: Text Processing',
                      'Topic :: Utilities',
                     ],
-      )
+     )
 
 

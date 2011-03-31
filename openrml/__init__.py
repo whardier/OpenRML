@@ -1,2 +1,0 @@
-from openrml import main
-
