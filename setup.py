@@ -24,6 +24,6 @@ setup(name='OpenRML',
                      'Topic :: Text Processing',
                      'Topic :: Utilities',
                     ],
-     )
+      )
 
 
