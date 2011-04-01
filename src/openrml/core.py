@@ -5,6 +5,7 @@
 
 import os
 import sys
+import copy
 
 from openrml.lib import *
 
@@ -18,6 +19,8 @@ from reportlab import rl_config
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.styles import getSampleStyleSheet
+
+from reportlab.platypus import Paragraph
 
 #Units
 import reportlab.lib.units
@@ -91,9 +94,18 @@ class RMLDocument():
     for stylesheet in self.doc.getElementsByTagName('stylesheet'):
       for element in stylesheet.childNodes:
         if element.nodeName == 'initialize':
-          pass
+          for initialize in element.childNodes:
+            if initialize.nodeName == 'alias':
+              alias = initialize
+              id = alias.getAttribute('id')
+              value = alias.getAttribute('value')
+              if id.startswith('style'):
+                style = copy.deepcopy(self.styles[value[6:]])
+                style.name = id[6:]
+                self.styles.add(style)
         elif element.nodeName == 'paraStyle':
           print element.toxml()
+          pass
 
   def doc_on_first_page(self, canvas, doc):
     pass
@@ -103,15 +115,33 @@ class RMLDocument():
 
   def get_template(self, out_file):
     attrs = prepare_template_attrs(self.doc_template_node)
-    print attrs
-    return SimpleDocTemplate(out_file, onFirstPage=self.doc_on_first_page,
-                             onLaterPages=self.doc_on_later_pages, **attrs)
+    return SimpleDocTemplate(out_file, **attrs)
+
+  def do_story(self):
+    items = []    
+    for story in self.doc.getElementsByTagName('story'):
+      for element in story.childNodes:
+        if element.nodeName == 'para':
+          para = u''
+          if element.hasAttribute('style'):
+            style = self.styles[element.getAttribute('style')]
+          else:
+            style = self.styles['Normal']
+          
+          for text in element.childNodes:
+            para = para + unicode(text.toxml())
+          items.append(Paragraph(para, style)) #add style support
+
+    return items
 
   def render(self, out_file):
     self.init_doc()
     self.init_template()
     template = self.get_template(out_file)
     self.init_stylesheet()
+    template.build(self.do_story(),
+                   onFirstPage=self.doc_on_first_page,
+                   onLaterPages=self.doc_on_later_pages)
 
 def main():
   from optparse import OptionParser
